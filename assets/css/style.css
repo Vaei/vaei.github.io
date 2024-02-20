@@ -457,7 +457,7 @@ main {
 
 .social-about-item .social-link {
   color: var(--light-gray-70);
-  font-size: 48px;
+  font-size: 36px;
   display: inline;
 }
 
@@ -973,6 +973,12 @@ main {
   border-radius: 16px;
   overflow: hidden;
   margin-bottom: 15px;
+}
+
+.project-img.github {
+  border-left-width: 50px;
+  width: 60%;
+  opacity: 70%;
 }
 
 .project-img::before {
