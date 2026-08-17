@@ -67,10 +67,8 @@ select.addEventListener("click", function () { elementToggleFunc(this); });
 for (let i = 0; i < selectItems.length; i++) {
   selectItems[i].addEventListener("click", function () {
 
-    let selectedValue = this.innerText.toLowerCase();
-    selectValue.innerText = this.innerText;
     elementToggleFunc(select);
-    filterFunc(selectedValue);
+    setLocation("portfolio", this.innerText);
 
   });
 }
@@ -92,23 +90,18 @@ const filterFunc = function (selectedValue) {
 
   }
 
+  for (let i = 0; i < filterBtn.length; i++) {
+    filterBtn[i].classList.toggle("active", filterBtn[i].innerText.toLowerCase() === selectedValue);
+    if (filterBtn[i].innerText.toLowerCase() === selectedValue) selectValue.innerText = filterBtn[i].innerText;
+  }
+
 }
 
 // add event in all filter button items for large screen
-let lastClickedBtn = filterBtn[0];
-
 for (let i = 0; i < filterBtn.length; i++) {
 
   filterBtn[i].addEventListener("click", function () {
-
-    let selectedValue = this.innerText.toLowerCase();
-    selectValue.innerText = this.innerText;
-    filterFunc(selectedValue);
-
-    lastClickedBtn.classList.remove("active");
-    this.classList.add("active");
-    lastClickedBtn = this;
-
+    setLocation("portfolio", this.innerText);
   });
 
 }
@@ -140,20 +133,62 @@ for (let i = 0; i < formInputs.length; i++) {
 const navigationLinks = document.querySelectorAll("[data-nav-link]");
 const pages = document.querySelectorAll("[data-page]");
 
-// add event to all nav link
-for (let i = 0; i < navigationLinks.length; i++) {
-  navigationLinks[i].addEventListener("click", function () {
+const slugify = function (text) { return text.trim().toLowerCase().replace(/\s+/g, "-"); }
+const unslugify = function (slug) { return slug.trim().toLowerCase().replace(/-/g, " "); }
 
-    for (let i = 0; i < pages.length; i++) {
-      if (this.innerHTML.toLowerCase() === pages[i].dataset.page) {
-        pages[i].classList.add("active");
-        navigationLinks[i].classList.add("active");
-        window.scrollTo(0, 0);
-      } else {
-        pages[i].classList.remove("active");
-        navigationLinks[i].classList.remove("active");
-      }
-    }
+const showPage = function (pageName) {
 
-  });
+  let found = false;
+
+  for (let i = 0; i < pages.length; i++) {
+    const match = pages[i].dataset.page === pageName;
+    pages[i].classList.toggle("active", match);
+    found = found || match;
+  }
+
+  for (let i = 0; i < navigationLinks.length; i++) {
+    navigationLinks[i].classList.toggle("active", navigationLinks[i].innerText.toLowerCase() === pageName);
+  }
+
+  return found;
+
 }
+
+// write the hash, which drives the actual page/filter change
+const setLocation = function (pageName, category) {
+  const hash = category && slugify(category) !== "all"
+    ? slugify(pageName) + "/" + slugify(category)
+    : slugify(pageName);
+  if (location.hash === "#" + hash) applyLocation();
+  else location.hash = hash;
+}
+
+const applyLocation = function () {
+
+  const parts = location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
+
+  let pageName = parts[0] ? unslugify(parts[0]) : "portfolio";
+  let category = parts[1] ? unslugify(parts[1]) : "all";
+
+  // a bare category hash such as #tech-art is treated as a portfolio filter
+  if (!showPage(pageName)) {
+    category = pageName;
+    pageName = "portfolio";
+    showPage(pageName);
+  }
+
+  if (pageName === "portfolio") {
+    const known = Array.from(filterBtn).some(function (btn) { return btn.innerText.toLowerCase() === category; });
+    filterFunc(known ? category : "all");
+  }
+
+  window.scrollTo(0, 0);
+
+}
+
+for (let i = 0; i < navigationLinks.length; i++) {
+  navigationLinks[i].addEventListener("click", function () { setLocation(this.innerText); });
+}
+
+window.addEventListener("hashchange", applyLocation);
+applyLocation();
