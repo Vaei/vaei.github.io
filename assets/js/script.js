@@ -170,7 +170,7 @@ const applyLocation = function () {
   let pageName = parts[0] ? unslugify(parts[0]) : "portfolio";
   let category = parts[1] ? unslugify(parts[1]) : "all";
 
-  // a bare category hash such as #tech-art is treated as a portfolio filter
+  // a bare category hash such as #gameplay is treated as a portfolio filter
   if (!showPage(pageName)) {
     category = pageName;
     pageName = "portfolio";
